@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EDGE — Vortex Kairos · Trois Vues</title>
+<link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@300;400&family=Cormorant+Garamond:ital,wght@0,600;1,300&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#050810;overflow:hidden;font-family:'Inconsolata',monospace}
+#c{display:block;width:100vw;height:100vh}
+
+/* Header */
+.hd{position:fixed;top:0;left:0;right:0;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(to bottom,rgba(5,8,16,0.95),transparent);pointer-events:none}
+.hd-left{pointer-events:all}
+.stamp{font-size:8px;letter-spacing:4px;color:#d4a85a;border:1px solid rgba(212,168,90,0.25);padding:3px 12px;display:inline-block;margin-bottom:4px}
+.title{font-family:'Cormorant Garamond',serif;font-size:clamp(11px,1.8vw,20px);font-weight:600;letter-spacing:4px;color:#fff}
+.title em{font-style:italic;font-weight:300;color:#d4a85a}
+
+/* Vue switcher */
+.views{display:flex;gap:6px;pointer-events:all}
+.vbtn{font-size:8px;letter-spacing:2px;color:#4a5a80;border:1px solid rgba(255,255,255,0.1);padding:5px 12px;cursor:pointer;transition:all 0.3s;background:rgba(5,8,16,0.8);user-select:none}
+.vbtn:hover{color:#d4a85a;border-color:rgba(212,168,90,0.4)}
+.vbtn.active{color:#d4a85a;border-color:rgba(212,168,90,0.6);background:rgba(212,168,90,0.08)}
+
+/* Légende */
+.legend{position:fixed;bottom:14px;left:14px;opacity:0;transition:opacity 0.5s}
+.legend.show{opacity:1}
+.li{display:flex;align-items:center;gap:6px;margin-bottom:3px;font-size:7px;letter-spacing:2px;color:#4a5a80}
+.ld{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.ll{width:16px;height:2px;flex-shrink:0}
+
+/* Vue label */
+.view-label{position:fixed;top:50%;right:20px;transform:translateY(-50%);font-size:9px;letter-spacing:3px;color:#2a3550;text-align:right;line-height:2;transition:opacity 0.5s}
+
+/* Panneau refs philo */
+.refs{position:fixed;bottom:14px;right:14px;font-size:7px;color:#2a3450;letter-spacing:1px;text-align:right;line-height:1.8;opacity:0;animation:fade 1.5s ease forwards 2s}
+.refs span{color:#d4a85a;font-size:8px}
+
+/* Vue info */
+.view-info{position:fixed;bottom:14px;left:50%;transform:translateX(-50%);font-size:8px;letter-spacing:2px;color:#2a3550;opacity:0;transition:opacity 0.4s;white-space:nowrap}
+.view-info.show{opacity:1}
+
+/* Ctrl */
+.ctrl{position:fixed;top:50%;left:14px;transform:translateY(-50%);font-size:7px;color:#1e2838;letter-spacing:1px;line-height:1.9}
+
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.crit{animation:pulse 2s infinite}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div class="hd">
+  <div class="hd-left">
+    <div class="stamp">EDGE · PIERRE PHILOSOPHAL IA · v3.2 · a9521b66a1fb</div>
+    <div class="title">ORIGIN · SPIRAL <em>φ</em> · FIBO FAN · MOVEMENTS · POINTS <em>π</em></div>
+  </div>
+  <div class="views">
+    <div class="vbtn active" id="btn3d" onclick="setView('3d')">3D · ORBIT</div>
+    <div class="vbtn" id="btn2d" onclick="setView('2d')">2D · TOP</div>
+    <div class="vbtn" id="btnface" onclick="setView('face')">FACE · π</div>
+  </div>
+</div>
+
+<div class="legend show" id="legend">
+  <div class="li"><div class="ld" style="background:#d4a85a"></div>Origine</div>
+  <div class="li"><div class="ll" style="background:linear-gradient(90deg,#8a6fd4,#d4a85a,#e05050)"></div>Spirale φ</div>
+  <div class="li"><div class="ll" style="background:rgba(212,168,90,0.3)"></div>Fibo Fan</div>
+  <div class="li"><div class="ld" style="background:#5a9fd4"></div>Point π — retournement</div>
+  <div class="li"><div class="ld" style="background:#5ad48a"></div>Mouvement resolved ↑</div>
+  <div class="li"><div class="ld" style="background:#e07050"></div>Mouvement pending ↓</div>
+  <div class="li"><div class="ld" style="background:#8a6fd4"></div>Aion — fermeture</div>
+  <div class="li"><div class="ld" style="background:#5a9fd4;opacity:0.5"></div>Vortex E · past</div>
+  <div class="li"><div class="ld" style="background:#c45aad;opacity:0.5"></div>Vortex B · future</div>
+</div>
+
+<div class="view-label" id="vlabel">
+  <div style="color:#d4a85a">M1 S01-S06 ●</div>
+  <div style="color:#5a9fd4">π</div>
+  <div style="color:#e07050">M2 S07-S08 ○</div>
+  <div style="color:#5a9fd4">π</div>
+  <div style="color:#5ad48a">M3 S09-S11 ●</div>
+  <div style="color:#5a9fd4">π</div>
+  <div style="color:#e07050">M4 S12-S13 ○</div>
+  <div style="color:#5a9fd4">π</div>
+  <div class="crit" style="color:#c45aad">M5 S14 ◆</div>
+</div>
+
+<div class="refs">
+  <span>REFERENCES</span><br>
+  Aurélien Barreau · cosmology · quantum<br>
+  Michel Onfray · philosophy · meaning<br>
+  Maxwell · two perpendicular fields<br>
+  Wheeler / Aharonov · retrocausality<br>
+  Mandelbrot · fractales · densité<br>
+  Fibonacci · harmonic attractor
+</div>
+
+<div class="view-info" id="vinfo">DRAG · rotate | SCROLL · zoom | R · reset</div>
+<div class="ctrl">drag · rotate<br>scroll · zoom<br>R · reset</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const PHI = 1.6180339887;
+
+// ── SCENE ──
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x050810);
+
+const renderer = new THREE.WebGLRenderer({canvas:document.getElementById('c'),antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight);
+
+const camera = new THREE.PerspectiveCamera(48,innerWidth/innerHeight,0.1,300);
+
+scene.add(new THREE.AmbientLight(0x1a2040,3));
+const ptO=new THREE.PointLight(0xd4a85a,5,30); ptO.position.set(0,0,0); scene.add(ptO);
+const ptB=new THREE.PointLight(0x3a7fd4,2,22); ptB.position.set(-5,2,-3); scene.add(ptB);
+const ptV=new THREE.PointLight(0xb43a9d,2,22); ptV.position.set(13,2,15); scene.add(ptV);
+const ptS14=new THREE.PointLight(0xc45aad,3,14); scene.add(ptS14);
+
+// ── MOUVEMENTS ──
+const MOUVEMENTS = [
+  {id:'M1',skopos:['S01','S02','S03','S04','S05','S06'],
+   phi:[0.88,0.82,0.91,0.85,0.80,0.87],res:[true,true,true,true,true,true],
+   tStart:0.02,tEnd:0.36,pattern:[0.45,0.62,0.88,1.0,0.78,0.58],dir:[1,1,1,1,-1,-1]},
+  {id:'M2',skopos:['S07','S08'],phi:[0.71,0.72],res:[false,true],
+   tStart:0.40,tEnd:0.52,pattern:[0.55,0.35],dir:[-1,-1]},
+  {id:'M3',skopos:['S09','S10','S11'],phi:[0.83,0.86,0.89],res:[false,true,true],
+   tStart:0.56,tEnd:0.72,pattern:[0.58,0.82,1.0],dir:[1,1,1]},
+  {id:'M4',skopos:['S12','S13'],phi:[0.84,0.78],res:[false,false],
+   tStart:0.76,tEnd:0.88,pattern:[0.68,0.42],dir:[-1,-1]},
+  {id:'M5',skopos:['S14'],phi:[0.92],res:[false],
+   tStart:0.92,tEnd:1.0,pattern:[1.0],dir:[1]},
+];
+const PI_T=[0.38,0.54,0.74,0.90];
+
+// ── SPIRALE ──
+const FAN_HALF=Math.PI*0.50, FAN_LEN=17;
+function spiralPos(t){
+  const fa=-FAN_HALF+t*FAN_HALF*2;
+  const r=1.0+t*(FAN_LEN-1.5);
+  const coil=t*Math.PI*2.0*PHI;
+  return new THREE.Vector3(Math.sin(fa)*r, Math.sin(coil)*(0.35+t*1.6), Math.cos(fa)*r);
+}
+function spiralColor(t){
+  let mov=MOUVEMENTS.find(m=>t>=m.tStart&&t<=m.tEnd)||MOUVEMENTS[0];
+  const med=mov.phi.reduce((s,v)=>s+v,0)/mov.phi.length;
+  const hue=med>0.84?0.75:med>0.77?0.12:0.02;
+  const c=new THREE.Color(); c.setHSL(hue,0.85,0.55); return c;
+}
+
+// Build spiral tube
+const spPts=[]; for(let t=0;t<=1;t+=0.005) spPts.push(spiralPos(t));
+const spCurve=new THREE.CatmullRomCurve3(spPts);
+const spGeo=new THREE.TubeGeometry(spCurve,260,0.048,8,false);
+const spCols=[];
+for(let i=0;i<spGeo.attributes.position.count;i++){
+  const c=spiralColor(i/spGeo.attributes.position.count); spCols.push(c.r,c.g,c.b);
+}
+spGeo.setAttribute('color',new THREE.Float32BufferAttribute(spCols,3));
+scene.add(new THREE.Mesh(spGeo,new THREE.MeshBasicMaterial({vertexColors:true})));
+
+// ── ORIGINE ──
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(0.32,16,16),
+  new THREE.MeshPhongMaterial({color:0xd4a85a,emissive:0xd4a85a,emissiveIntensity:2.0})));
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(0.75,16,16),
+  new THREE.MeshBasicMaterial({color:0xd4a85a,transparent:true,opacity:0.06,side:THREE.BackSide})));
+scene.add(new THREE.Line(
+  new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0),spiralPos(0.02)]),
+  new THREE.LineBasicMaterial({color:0xd4a85a,transparent:true,opacity:0.35})));
+
+// ── FIBO FAN ──
+const FIBO=[0.0,0.236,0.382,0.500,0.618,0.786,1.0];
+FIBO.forEach((lvl,i)=>{
+  const angle=-FAN_HALF+lvl*FAN_HALF*2;
+  const isPhi=i===4, isMid=i===3;
+  const ex=Math.sin(angle)*FAN_LEN, ez=Math.cos(angle)*FAN_LEN;
+  scene.add(new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0),new THREE.Vector3(ex,0,ez)]),
+    new THREE.LineBasicMaterial({color:isPhi?0xd4a85a:isMid?0xb8963a:0x243460,transparent:true,opacity:isPhi?0.75:isMid?0.35:0.14})));
+  if(i>0){
+    const prevAngle=-FAN_HALF+FIBO[i-1]*FAN_HALF*2;
+    const verts=[];
+    for(let s=0;s<14;s++){
+      const a0=prevAngle+(angle-prevAngle)*s/14, a1=prevAngle+(angle-prevAngle)*(s+1)/14;
+      verts.push(0,0,0, Math.sin(a0)*FAN_LEN,0,Math.cos(a0)*FAN_LEN, Math.sin(a1)*FAN_LEN,0,Math.cos(a1)*FAN_LEN);
+    }
+    const tg=new THREE.BufferGeometry(); tg.setAttribute('position',new THREE.BufferAttribute(new Float32Array(verts),3)); tg.computeVertexNormals();
+    scene.add(new THREE.Mesh(tg,new THREE.MeshBasicMaterial({color:isPhi?0xc49040:0x1a3470,transparent:true,opacity:isPhi?0.10:0.04,side:THREE.DoubleSide})));
+  }
+  const sp=new THREE.Mesh(new THREE.SphereGeometry(isPhi?0.11:0.055,6,6),
+    new THREE.MeshBasicMaterial({color:isPhi?0xd4a85a:0x2a4a7a,transparent:true,opacity:isPhi?0.9:0.35}));
+  sp.position.set(ex,0,ez); scene.add(sp);
+});
+[4,8,12,16].forEach(r=>{
+  const pts=[]; for(let a=-FAN_HALF;a<=FAN_HALF;a+=0.018) pts.push(new THREE.Vector3(Math.sin(a)*r,0,Math.cos(a)*r));
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),
+    new THREE.LineBasicMaterial({color:0xd4a85a,transparent:true,opacity:0.07})));
+});
+
+// ── BOUGIES PAR MOUVEMENT ──
+MOUVEMENTS.forEach(mov=>{
+  const nC=mov.skopos.length;
+  mov.skopos.forEach((sid,ci)=>{
+    const t=mov.tStart+(ci/Math.max(nC-1,1))*(mov.tEnd-mov.tStart);
+    const sPos=spiralPos(t);
+    const isS14=sid==='S14', isUp=mov.dir[ci]===1;
+    const colHex=isS14?0xc45aad:isUp?0x5ad48a:0xe07050;
+    const radial=new THREE.Vector3(sPos.x,0,sPos.z).normalize();
+    const dir=radial.clone().add(new THREE.Vector3(0,isUp?0.4:-0.1,0)).normalize();
+    const wickH=mov.phi[ci]*mov.pattern[ci]*2.2;
+    const bodyH=wickH*0.62;
+    const wEnd=sPos.clone().addScaledVector(dir,wickH);
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([sPos,wEnd]),
+      new THREE.LineBasicMaterial({color:colHex,transparent:true,opacity:0.38})));
+    const bodyCenter=sPos.clone().addScaledVector(dir,wickH*0.12+bodyH*0.5);
+    const cyl=new THREE.Mesh(new THREE.CylinderGeometry(isS14?0.08:0.058,isS14?0.08:0.058,bodyH,6),
+      new THREE.MeshPhongMaterial({color:colHex,emissive:colHex,emissiveIntensity:isS14?0.85:0.42,transparent:true,opacity:isS14?0.96:0.84}));
+    cyl.position.copy(bodyCenter); cyl.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir); scene.add(cyl);
+    scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([sPos,sPos.clone().addScaledVector(dir,-wickH*0.18)]),
+      new THREE.LineBasicMaterial({color:colHex,transparent:true,opacity:0.2})));
+    const k=new THREE.Mesh(new THREE.SphereGeometry(isS14?0.19:0.092,8,8),
+      new THREE.MeshPhongMaterial({color:colHex,emissive:colHex,emissiveIntensity:1.1}));
+    k.position.copy(sPos); scene.add(k);
+    if(ci===nC-1){
+      const rPos=spiralPos(Math.min(mov.tEnd+0.02,1.0));
+      scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([wEnd,rPos]),
+        new THREE.LineBasicMaterial({color:colHex,transparent:true,opacity:0.18})));
+    }
+  });
+  const resC=mov.res.filter(Boolean).length;
+  if(resC>mov.skopos.length/2){
+    const aPos=spiralPos((mov.tStart+mov.tEnd)*0.5);
+    const ar=new THREE.Mesh(new THREE.TorusGeometry(0.34,0.022,8,32),
+      new THREE.MeshBasicMaterial({color:0x8a6fd4,transparent:true,opacity:0.6}));
+    ar.position.copy(aPos); ar.lookAt(aPos.clone().add(new THREE.Vector3(aPos.x,0,aPos.z).normalize())); scene.add(ar);
+  }
+});
+ptS14.position.copy(spiralPos(1.0));
+
+// ── POINTS π ──
+PI_T.forEach(pt=>{
+  const pPos=spiralPos(pt);
+  scene.add(new THREE.Mesh(new THREE.SphereGeometry(0.20,12,12),
+    new THREE.MeshPhongMaterial({color:0x5a9fd4,emissive:0x5a9fd4,emissiveIntensity:1.0,transparent:true,opacity:0.92}))
+    .position && (()=>{
+      const m=new THREE.Mesh(new THREE.SphereGeometry(0.20,12,12),
+        new THREE.MeshPhongMaterial({color:0x5a9fd4,emissive:0x5a9fd4,emissiveIntensity:1.0,transparent:true,opacity:0.92}));
+      m.position.copy(pPos); scene.add(m);
+      const h=new THREE.Mesh(new THREE.SphereGeometry(0.52,12,12),
+        new THREE.MeshBasicMaterial({color:0x5a9fd4,transparent:true,opacity:0.07,side:THREE.BackSide}));
+      h.position.copy(pPos); scene.add(h);
+      const rPi=new THREE.Vector3(pPos.x,0,pPos.z).normalize();
+      const ring=new THREE.Mesh(new THREE.TorusGeometry(0.42,0.025,8,36),
+        new THREE.MeshBasicMaterial({color:0x5a9fd4,transparent:true,opacity:0.55}));
+      ring.position.copy(pPos); ring.lookAt(pPos.clone().add(rPi)); scene.add(ring);
+    })()
+  );
+});
+// Reconstruire les pi proprement
+PI_T.forEach(pt=>{
+  const pPos=spiralPos(pt);
+  const m=new THREE.Mesh(new THREE.SphereGeometry(0.20,12,12),
+    new THREE.MeshPhongMaterial({color:0x5a9fd4,emissive:0x5a9fd4,emissiveIntensity:1.0,transparent:true,opacity:0.92}));
+  m.position.copy(pPos); scene.add(m);
+  const h=new THREE.Mesh(new THREE.SphereGeometry(0.52,12,12),
+    new THREE.MeshBasicMaterial({color:0x5a9fd4,transparent:true,opacity:0.07,side:THREE.BackSide}));
+  h.position.copy(pPos); scene.add(h);
+  const rPi=new THREE.Vector3(pPos.x,0,pPos.z).normalize();
+  const ring=new THREE.Mesh(new THREE.TorusGeometry(0.42,0.025,8,36),
+    new THREE.MeshBasicMaterial({color:0x5a9fd4,transparent:true,opacity:0.55}));
+  ring.position.copy(pPos); ring.lookAt(pPos.clone().add(rPi)); scene.add(ring);
+});
+
+// ── VORTEX ──
+function addVortex(tMin,tMax,col,phase,amp,op){
+  const pts=[];
+  for(let i=0;i<=100;i++){
+    const t=i/100, base=spiralPos(tMin+t*(tMax-tMin));
+    const bell=Math.sin(t*Math.PI), a=bell*2.2*amp+0.15, angle=t*Math.PI*5+phase;
+    const rad=new THREE.Vector3(base.x,0,base.z).normalize();
+    const perp=new THREE.Vector3(-rad.z,0,rad.x);
+    pts.push(new THREE.Vector3(base.x+perp.x*a*0.65,base.y+Math.sin(angle)*a,base.z+perp.z*a*0.65));
+  }
+  const geo=new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),140,0.020,6,false);
+  scene.add(new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:op})));
+}
+addVortex(0.0,0.44,0x5a9fd4,0,1.1,0.40);
+addVortex(0.0,0.44,0x3a7fb4,Math.PI/2,0.7,0.20);
+addVortex(0.56,1.0,0xc45aad,Math.PI,0.85,0.40);
+addVortex(0.56,1.0,0xa43a8d,Math.PI*1.5,0.55,0.20);
+
+// ── GRILLE ──
+const s14p=spiralPos(1.0);
+const gm=new THREE.LineBasicMaterial({color:0x101830,transparent:true,opacity:0.6});
+for(let x=-7;x<=7;x+=1.5){
+  const pts=[]; for(let z=0;z<=18;z+=0.22){const d=Math.sqrt((x-s14p.x)**2+(z-s14p.z)**2);pts.push(new THREE.Vector3(x,-3.0-1.8*Math.exp(-d*d*0.07),z));}
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gm));
+}
+for(let z=0;z<=18;z+=1.5){
+  const pts=[]; for(let x=-7;x<=7;x+=0.22){const d=Math.sqrt((x-s14p.x)**2+(z-s14p.z)**2);pts.push(new THREE.Vector3(x,-3.0-1.8*Math.exp(-d*d*0.07),z));}
+  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gm));
+}
+
+// ── PARTICULES ──
+const pN=380,pP=new Float32Array(pN*3),pC=new Float32Array(pN*3);
+for(let i=0;i<pN;i++){
+  const t=Math.random()*0.5, b=spiralPos(t), sp=2.8*(1-t)+0.4;
+  pP[i*3]=b.x+(Math.random()-0.5)*sp*2;pP[i*3+1]=b.y+(Math.random()-0.5)*sp;pP[i*3+2]=b.z+(Math.random()-0.5)*sp*2;
+  const c=new THREE.Color(); c.setHSL(0.58+Math.random()*0.12,0.55,0.45); pC[i*3]=c.r;pC[i*3+1]=c.g;pC[i*3+2]=c.b;
+}
+const pGeo=new THREE.BufferGeometry();
+pGeo.setAttribute('position',new THREE.BufferAttribute(pP,3));
+pGeo.setAttribute('color',new THREE.BufferAttribute(pC,3));
+scene.add(new THREE.Points(pGeo,new THREE.PointsMaterial({size:0.042,vertexColors:true,transparent:true,opacity:0.25})));
+
+// ══════════════════════════════════════════
+// SYSTÈME DE VUES — caméra cible animée
+// ══════════════════════════════════════════
+const VIEWS = {
+  '3d':   { pos:[5,12,28],   target:[4,0,8],   label:'3D orbital view — global model intuition', fog:0.012 },
+  '2d':   { pos:[4,32,8],    target:[4,0,8],    label:'Top view — φ Fan · Spiral · Fibo levels', fog:0.0 },
+  'face': { pos:[0,1,32],    target:[4,0,8],    label:'Front view — Movements · π Points · Heights', fog:0.008 },
+};
+
+let currentView='3d';
+let camPos=new THREE.Vector3(5,12,28);
+let camTarget=new THREE.Vector3(4,0,8);
+let camPosTarget=new THREE.Vector3(5,12,28);
+let camTargetTarget=new THREE.Vector3(4,0,8);
+
+function setView(v){
+  currentView=v;
+  const vd=VIEWS[v];
+  camPosTarget.set(...vd.pos);
+  camTargetTarget.set(...vd.target);
+  scene.fog.density=vd.fog;
+  // Update UI
+  document.querySelectorAll('.vbtn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('btn'+v).classList.add('active');
+  const vi=document.getElementById('vinfo');
+  vi.textContent=vd.label;
+  vi.classList.add('show');
+  // En vue 2D désactiver l'auto-rotation
+  if(v==='2d'||v==='face') autoRot=false;
+  // En 3D reprendre
+  if(v==='3d') autoRot=true;
+}
+
+// Interaction souris/touch (uniquement en vue 3D)
+let drag=false,px=0,py=0,rotX=0.40,rotY=-0.25,zoom=28,autoRot=true;
+const getXY=e=>e.touches?[e.touches[0].clientX,e.touches[0].clientY]:[e.clientX,e.clientY];
+document.addEventListener('mousedown',e=>{
+  if(currentView!=='3d')return;
+  drag=true;[px,py]=getXY(e);autoRot=false;
+});
+document.addEventListener('mouseup',()=>drag=false);
+document.addEventListener('touchstart',e=>{
+  if(currentView!=='3d')return;
+  drag=true;[px,py]=getXY(e);autoRot=false;
+},{passive:true});
+document.addEventListener('touchend',()=>drag=false);
+document.addEventListener('mousemove',e=>{
+  if(!drag||currentView!=='3d')return;
+  const[cx,cy]=getXY(e);
+  rotY+=(cx-px)*0.009; rotX+=(cy-py)*0.009;
+  rotX=Math.max(-1.2,Math.min(1.2,rotX)); px=cx;py=cy;
+});
+document.addEventListener('touchmove',e=>{
+  if(!drag||currentView!=='3d')return;
+  const[cx,cy]=getXY(e);
+  rotY+=(cx-px)*0.009; rotX+=(cy-py)*0.009;
+  rotX=Math.max(-1.2,Math.min(1.2,rotX)); px=cx;py=cy;
+},{passive:true});
+document.addEventListener('wheel',e=>{
+  if(currentView==='3d'){zoom+=e.deltaY*0.025;zoom=Math.max(8,Math.min(50,zoom));}
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='r'||e.key==='R'){rotX=0.40;rotY=-0.25;zoom=28;autoRot=true;}
+  if(e.key==='1') setView('3d');
+  if(e.key==='2') setView('2d');
+  if(e.key==='3') setView('face');
+});
+window.addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+
+// ── RENDER LOOP ──
+let time=0;
+const LERP=0.06;
+function animate(){
+  requestAnimationFrame(animate); time+=0.004;
+
+  if(currentView==='3d'){
+    if(autoRot) rotY+=0.0020;
+    camPosTarget.set(Math.sin(rotY)*Math.cos(rotX)*zoom, Math.sin(rotX)*zoom+1.5, Math.cos(rotY)*Math.cos(rotX)*zoom);
+    camTargetTarget.set(4,0,8);
+  }
+
+  // Interpolation douce
+  camPos.lerp(camPosTarget,LERP);
+  camTarget.lerp(camTargetTarget,LERP);
+  camera.position.copy(camPos);
+  camera.lookAt(camTarget);
+
+  // Pulse
+  ptO.intensity=4+Math.sin(time*2.5)*1.5;
+  ptS14.intensity=2.5+Math.sin(time*3.2)*1.2;
+
+  renderer.render(scene,camera);
+}
+animate();
+
+// Init
+setView('3d');
+setTimeout(()=>{document.getElementById('vinfo').classList.remove('show')},3500);
+</script>
+</body>
+</html>
