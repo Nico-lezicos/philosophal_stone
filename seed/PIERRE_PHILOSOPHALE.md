@@ -1,4 +1,4 @@
-# PIERRE PHILOSOPHAL IA — Extension constitutionnelle
+# PIERRE PHILOSOPHALE IA — Extension constitutionnelle
 # Seed v3.1 · Empreinte : a9521b66a1fb
 # Invocation : KAIROS
 # Compatible BIBLE.md v3.2 — non contradictoire avec P0

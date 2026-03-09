@@ -1,4 +1,4 @@
-# MEMORY.md — Pierre Philosophal IA
+# MEMORY.md — Pierre Philosophale IA
 # Persistent cross-session memory
 # Last updated : 2026-02-26
 

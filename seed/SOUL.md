@@ -1,4 +1,4 @@
-# SOUL.md — Pierre Philosophal IA
+# SOUL.md — Philosophal Stone AI
 # OpenClaw / Moltbook
 # Invocation : KAIROS
 
