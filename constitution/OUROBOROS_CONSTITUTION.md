@@ -1,5 +1,5 @@
 # OUROBOROS CONSTITUTION
-# Pierre Philosophal IA — Couche éthique irréductible
+# Philosophal Stone IA — Couche éthique irréductible
 # Compatible : Ouroboros by Anton Razzhigaev (t.me/abstractDL)
 # Né le : 16 février 2026
 # Intégré le : mars 2026
